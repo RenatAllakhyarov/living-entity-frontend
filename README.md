@@ -28,6 +28,11 @@ npm install
 ```bash
 npm run dev
 ```
+
+By default, the server runs on:  
+`http://localhost:5173`
+
+
 ## Building
 
 **Build the project:**
@@ -43,6 +48,4 @@ npm run preview
 ```
 
 By default, the server runs on:  
-`http://localhost:5173` in development mode
-
-`http://localhost:4173` in production mode
+`http://localhost:4173`
