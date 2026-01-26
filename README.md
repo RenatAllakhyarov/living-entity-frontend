@@ -30,19 +30,21 @@ npm install
 
 ---
 
-## Running the Project
+## Contributing
 
-**Development running:**
+**Running the Project in the development mode:**
 
 ```bash
 npm run dev
 ```
 
-**Production running:**
+**Running the Project in the build mode:**
 
 ```bash
 npm run build
 ```
+
+**Running the Project in the preview mode:**
 
 ```bash
 npm run preview
