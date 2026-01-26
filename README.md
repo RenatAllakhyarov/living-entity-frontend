@@ -8,7 +8,7 @@ Living Entity - app that simulates a living entity. You can track various metric
 
 1) Clone the repository
 ```bash
-git clone <https://github.com/RenatAllakhyarov/living-entity-frontend.git>
+git clone https://github.com/RenatAllakhyarov/living-entity-frontend.git
 ```
 2) Go to the project folder
 ```bash
@@ -32,16 +32,19 @@ npm install
 
 ## Running the Project
 
-**Development:**
+**Development running:**
 
 ```bash
 npm run dev
 ```
 
-**Production:**
+**Production running:**
 
 ```bash
 npm run build
+```
+
+```bash
 npm run preview
 ```
 
