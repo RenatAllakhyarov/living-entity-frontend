@@ -39,13 +39,13 @@ npm run dev
 ```
 ## Building
 
-** Build the project:**
+**Build the project:**
 
 ```bash
 npm run build
 ```
 
-** Preview the bulid:**
+**Preview the bulid:**
 
 ```bash
 npm run preview
