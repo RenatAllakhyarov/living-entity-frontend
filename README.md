@@ -37,14 +37,15 @@ npm install
 ```bash
 npm run dev
 ```
+## Building
 
-**Running the Project in the build mode:**
+** Build the project:**
 
 ```bash
 npm run build
 ```
 
-**Running the Project in the preview mode:**
+** Preview the bulid:**
 
 ```bash
 npm run preview
