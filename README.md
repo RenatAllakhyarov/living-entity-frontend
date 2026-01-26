@@ -20,19 +20,10 @@ npm install
 ```
 ---
 
-## Available NPM Scripts
-
-| Script            | Description                                 |
-| ----------------- | ------------------------------------------- |
-| `npm run dev`     | Start in development mode                   |
-| `npm run build`   | Compile TypeScript to JavaScript in `dist/` |
-| `npm run preview` | Run compiled app from `dist/`               |
-
----
 
 ## Contributing
 
-**Running the Project in the development mode:**
+**Run the Project in the development mode:**
 
 ```bash
 npm run dev
