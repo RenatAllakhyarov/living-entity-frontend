@@ -29,8 +29,7 @@ npm install
 npm run dev
 ```
 
-By default, the server runs on:  
-`http://localhost:5173`
+By default, the server runs on:  `http://localhost:5173`
 
 
 ## Building
@@ -47,5 +46,4 @@ npm run build
 npm run preview
 ```
 
-By default, the server runs on:  
-`http://localhost:4173`
+By default, the server runs on:  `http://localhost:4173`
