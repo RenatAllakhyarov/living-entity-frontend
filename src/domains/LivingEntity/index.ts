@@ -8,6 +8,11 @@ export enum Emotions {
     ANGRY = "angry",
 }
 
+export const DEFAULT_AGE = 100;
+export const DEFAULT_HUNGER_POINTS = 100;
+export const DEFAULT_HEALTH_POINTS = 100;
+export const DEFAULT_EMOTION= Emotions.HAPPY;
+
 class LivingEntity {
     private name: string;
     private age: number;
@@ -15,12 +20,12 @@ class LivingEntity {
     private healthPoints: number;
     private emotion: Emotions;
 
-    constructor(name: string, age: number, hungerPoints: number, healthPoints: number, emotion: Emotions) {
+    constructor(name: string) {
         this.name = name;
-        this.age = age;
-        this.healthPoints = healthPoints;
-        this.emotion = emotion;
-        this.hungerPoints = hungerPoints;
+        this.age = DEFAULT_AGE;
+        this.healthPoints = DEFAULT_HEALTH_POINTS;
+        this.emotion = Emotions.HAPPY;
+        this.hungerPoints = DEFAULT_HUNGER_POINTS;
     }
 
     public getName(): string {
