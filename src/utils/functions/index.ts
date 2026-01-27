@@ -1,21 +1,13 @@
-export const maxAge = 100;
-export const minAge = 0;
+export const MIN_SETTING_VALUE = 100;
+export const MAX_SETTING_VALUE = 0;
 
-export const maxHealthPoints = 100;
-export const minHealthPoints = 0;
+export const DIVIDER = 1;
+export const REMAINDER_FROM_DIVISION = 0;
 
-export const isAgeValid = (newAge: number): boolean => {
-    if (newAge % 1 !== 0) {
-        return false;
-    } 
-
-    return newAge >= minAge && newAge <= maxAge;        
-};
-
-export const isHealthPointsValid = (newHealthPoints: number): boolean => {
-    if (newHealthPoints %1!==0) {
+export const isSettingValueValid = (newValue: number): boolean => {
+    if (newValue % DIVIDER !== REMAINDER_FROM_DIVISION) {
         return false;
     }
 
-    return newHealthPoints >= minHealthPoints && newHealthPoints <= maxHealthPoints;
+    return newValue >= MAX_SETTING_VALUE && newValue <= MIN_SETTING_VALUE;
 }
