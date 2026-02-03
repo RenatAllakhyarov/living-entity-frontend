@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "ES2020",
+        "target": "es5",
         "useDefineForClassFields": true,
         "lib": ["ES2020", "DOM", "DOM.Iterable"],
         "module": "ESNext",
@@ -16,10 +16,12 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
         "noUncheckedSideEffectImports": true,
+        "experimentalDecorators": true,
 
         "baseUrl": ".",
         "paths": {
             "@api/*": ["src/api/*"],
+            "@config/*": ["src/config/*"],
             "@pages/*": ["src/pages/*"],
             "@layouts/*": ["src/layouts/*"],
             "@components/*": ["src/components/*"],
