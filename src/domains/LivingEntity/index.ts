@@ -1,31 +1,5 @@
-import { getEmotion } from "@config/EntityConfig";
-
-export enum Emotions {
-    HAPPY = "😊",
-    AFRAID = "😨",
-    SAD = "😢",
-    BORED = "😒",
-    SICK = "🤧",
-    HORNY = "😏",
-    ANGRY = "🤬",
-    NONE = "😑",
-}
-
-export enum LifeStatus {
-    DEAD = "dead",
-    LIVE = "live",
-}
-
-export const ZERO_VALUE = 0;
-export const DEFAULT_HUNGER_POINTS = 100;
-export const DEFAULT_HEALTH_POINTS = 100;
-export const DEFAULT_EMOTION = Emotions.HAPPY;
-
-export const DECREASE_VALUE = 10;
-export const DECREASE_BY_ONE_POINT = 1;
-
-export const GOOD_HUNGER_VALUE = 60;
-export const MIN_GOOD_HEALTH_POINTS_VALUE = 20;
+import { EntityConfig } from "@config/EntityConfig";
+import { Emotions } from "@utils/constants";
 
 function handleIncorrectValues(
     target: any,
@@ -34,7 +8,7 @@ function handleIncorrectValues(
 ) {
     const original = descriptor.value;
 
-    descriptor.value = function(newValue: number) {
+    descriptor.value = function (newValue: number) {
         if (newValue < 0) {
             newValue = 0;
         }
@@ -51,7 +25,7 @@ class LivingEntity {
     private hungerPoints: number;
     private healthPoints: number;
     private emotion: Emotions;
-    private lifeStatus: LifeStatus;
+    private isAlive: boolean;
 
     constructor(
         name: string,
@@ -60,16 +34,14 @@ class LivingEntity {
         hungerPoints?: number,
     ) {
         this.name = name;
-        this.healthPoints = healthPoints ?? DEFAULT_HEALTH_POINTS;
-        this.emotion = emotion ?? DEFAULT_EMOTION;
-        this.hungerPoints = hungerPoints ?? DEFAULT_HUNGER_POINTS;
+        this.healthPoints = healthPoints ?? EntityConfig.DEFAULT_HEALTH_POINTS;
+        this.emotion = emotion ?? EntityConfig.DEFAULT_EMOTION;
+        this.hungerPoints = hungerPoints ?? EntityConfig.DEFAULT_HUNGER_POINTS;
         this.createdAt = Date.now();
-        this.lifeStatus = LifeStatus.LIVE;
+        this.isAlive = true;
 
         setInterval(() => {
             this.entityLife();
-
-            this.computeEmotion();
         }, 1000);
     }
 
@@ -98,8 +70,8 @@ class LivingEntity {
         return this.emotion;
     }
 
-    public setEmotion(newEmotion: Emotions) {
-        this.emotion = newEmotion;
+    public setEmotion() {
+        this.emotion = this.computeEmotion();
     }
 
     public getHungerPoints(): number {
@@ -111,67 +83,103 @@ class LivingEntity {
     }
 
     private computeEmotion() {
-        this.setEmotion(getEmotion(this.healthPoints, this.hungerPoints));
+        if (!this.hungerPoints && !this.healthPoints) {
+            return Emotions.NONE;
+        }
+
+        if (this.healthPoints >= 80 && this.hungerPoints >= 80) {
+            return Emotions.HAPPY;
+        }
+
+        if (this.healthPoints <= 40 && this.hungerPoints > 10) {
+            return Emotions.AFRAID;
+        }
+
+        if (this.hungerPoints > 10 && this.hungerPoints <= 30) {
+            return Emotions.SAD;
+        }
+
+        if (
+            this.healthPoints > 20 &&
+            this.healthPoints < 70 &&
+            this.hungerPoints > 30 &&
+            this.hungerPoints < 70
+        ) {
+            return Emotions.BORED;
+        }
+
+        if (this.healthPoints <= 10) {
+            return Emotions.SICK;
+        }
+
+        if (this.healthPoints >= 70 && this.hungerPoints >= 70) {
+            return Emotions.HORNY;
+        }
+
+        if (this.hungerPoints <= 10) {
+            return Emotions.ANGRY;
+        }
+
+        return EntityConfig.DEFAULT_EMOTION;
     }
 
     private entityLife() {
-        if (this.lifeStatus === LifeStatus.DEAD) {
+        if (!this.isAlive) {
             return;
         }
 
         if (
-            this.hungerPoints > GOOD_HUNGER_VALUE &&
-            this.healthPoints < DEFAULT_HEALTH_POINTS
+            this.hungerPoints > EntityConfig.GOOD_HUNGER_VALUE &&
+            this.healthPoints < EntityConfig.DEFAULT_HEALTH_POINTS
         ) {
             this.setHealthPoints(
                 Math.min(
-                    this.healthPoints + DECREASE_VALUE,
-                    DEFAULT_HEALTH_POINTS,
+                    this.healthPoints + EntityConfig.HEALTH_LOOSE_SPEED,
+                    EntityConfig.DEFAULT_HEALTH_POINTS,
                 ),
             );
 
+            this.setEmotion();
+            
             return;
         }
 
         if (
-            this.hungerPoints > ZERO_VALUE &&
-            this.healthPoints > MIN_GOOD_HEALTH_POINTS_VALUE
+            this.hungerPoints > 0 &&
+            this.healthPoints > EntityConfig.MIN_GOOD_HEALTH_POINTS_VALUE
         ) {
             this.setHungerPoints(
-                Math.max(
-                    ZERO_VALUE,
-                    this.hungerPoints - DECREASE_VALUE,
-                ),
+                Math.max(0, this.hungerPoints - EntityConfig.STARVING_SPEED),
             );
-
+            
+            this.setEmotion();
+            
             return;
         }
 
-        if (this.healthPoints > ZERO_VALUE) {
+        if (this.healthPoints > 0) {
             const decreaseValue =
-                this.healthPoints < MIN_GOOD_HEALTH_POINTS_VALUE
-                    ? DECREASE_BY_ONE_POINT
-                    : DECREASE_VALUE;
+                this.healthPoints < EntityConfig.MIN_GOOD_HEALTH_POINTS_VALUE
+                    ? EntityConfig.DYING_SPEED
+                    : EntityConfig.HEALTH_LOOSE_SPEED;
 
             this.setHealthPoints(
-                Math.max(
-                    ZERO_VALUE,
-                    this.healthPoints - decreaseValue,
-                ),
+                Math.max(0, this.healthPoints - decreaseValue),
             );
-
+            
+            this.setEmotion();
+            
             return;
         }
 
-        if (this.healthPoints === ZERO_VALUE) {
+        if (!this.healthPoints) {
             this.emotion = Emotions.NONE;
-            this.healthPoints = ZERO_VALUE;
-            this.hungerPoints = ZERO_VALUE;
-            this.createdAt = ZERO_VALUE;
-            this.lifeStatus = LifeStatus.DEAD;
-
+            this.isAlive = false;
+            
             return;
         }
+
+        this.setEmotion();
     }
 }
 
