@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "ES2022",
         "useDefineForClassFields": true,
         "lib": ["ES2020", "DOM", "DOM.Iterable"],
         "module": "ESNext",
@@ -22,7 +22,7 @@
         "paths": {
             "@api/*": ["src/api/*"],
             "@config/*": ["src/config/*"],
-            "@pages/*": ["src/pages/*"],
+            "@pages/*": ["src/pages/*"],    
             "@layouts/*": ["src/layouts/*"],
             "@components/*": ["src/components/*"],
             "@context/*": ["src/context/*"],

@@ -1,22 +1,25 @@
 import { EntityConfig } from "@config/EntityConfig";
 import { Emotions } from "@utils/constants";
 
-function handleIncorrectValues(
-    target: any,
-    key: string,
-    descriptor: PropertyDescriptor,
+function handleIncorrectValues<T>(
+    value: Function,
+    context: ClassMethodDecoratorContext,
 ) {
-    const original = descriptor.value;
-
-    descriptor.value = function (newValue: number) {
-        if (newValue < 0) {
-            newValue = 0;
+    return function (this: T, ...methodArguments: any[]) {
+        if (typeof methodArguments[0] !== "number") {
+            return;
         }
 
-        return original.apply(this, [newValue]);
-    };
+        if (methodArguments[0] < 0) {
+            methodArguments[0] = 0;
+        }
 
-    return descriptor;
+        if (methodArguments[0] > 100) {
+            methodArguments[0] = 100;
+        }
+
+        return value.apply(this, methodArguments);
+    };
 }
 
 class LivingEntity {
@@ -26,6 +29,7 @@ class LivingEntity {
     private healthPoints: number;
     private emotion: Emotions;
     private isAlive: boolean;
+    private interval: NodeJS.Timeout | null;
 
     constructor(
         name: string,
@@ -40,7 +44,7 @@ class LivingEntity {
         this.createdAt = Date.now();
         this.isAlive = true;
 
-        setInterval(() => {
+        this.interval = setInterval(() => {
             this.entityLife();
         }, 1000);
     }
@@ -70,7 +74,7 @@ class LivingEntity {
         return this.emotion;
     }
 
-    public setEmotion() {
+    public updateEmotion() {
         this.emotion = this.computeEmotion();
     }
 
@@ -78,6 +82,7 @@ class LivingEntity {
         return this.hungerPoints;
     }
 
+    @handleIncorrectValues
     public setHungerPoints(newHungerPoints: number) {
         this.hungerPoints = newHungerPoints;
     }
@@ -125,6 +130,9 @@ class LivingEntity {
 
     private entityLife() {
         if (!this.isAlive) {
+            this.interval && clearInterval(this.interval);
+            this.interval = null;
+
             return;
         }
 
@@ -133,14 +141,11 @@ class LivingEntity {
             this.healthPoints < EntityConfig.DEFAULT_HEALTH_POINTS
         ) {
             this.setHealthPoints(
-                Math.min(
-                    this.healthPoints + EntityConfig.HEALTH_LOOSE_SPEED,
-                    EntityConfig.DEFAULT_HEALTH_POINTS,
-                ),
+                this.healthPoints + EntityConfig.HEALTH_LOOSE_SPEED,
             );
 
-            this.setEmotion();
-            
+            this.updateEmotion();
+
             return;
         }
 
@@ -149,11 +154,11 @@ class LivingEntity {
             this.healthPoints > EntityConfig.MIN_GOOD_HEALTH_POINTS_VALUE
         ) {
             this.setHungerPoints(
-                Math.max(0, this.hungerPoints - EntityConfig.STARVING_SPEED),
+                this.hungerPoints - EntityConfig.STARVING_SPEED,
             );
-            
-            this.setEmotion();
-            
+
+            this.updateEmotion();
+
             return;
         }
 
@@ -163,23 +168,23 @@ class LivingEntity {
                     ? EntityConfig.DYING_SPEED
                     : EntityConfig.HEALTH_LOOSE_SPEED;
 
-            this.setHealthPoints(
-                Math.max(0, this.healthPoints - decreaseValue),
-            );
-            
-            this.setEmotion();
-            
+            this.setHealthPoints(this.healthPoints - decreaseValue);
+
+            this.updateEmotion();
+
             return;
         }
 
         if (!this.healthPoints) {
             this.emotion = Emotions.NONE;
             this.isAlive = false;
-            
+            this.interval && clearInterval(this.interval);
+            this.interval = null;
+
             return;
         }
 
-        this.setEmotion();
+        this.updateEmotion();
     }
 }
 

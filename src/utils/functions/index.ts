@@ -6,7 +6,7 @@ export const REMAINDER_FROM_DIVISION = 0;
 
 export const MILLISECONDS_IN_SECOND = 1000;
 export const MILLISECONDS_IN_MINUTE = 60 * MILLISECONDS_IN_SECOND;
-export const MILLISECONDS_IN_HOUR = 3600 * MILLISECONDS_IN_SECOND;
+export const MILLISECONDS_IN_HOUR = 60 * MILLISECONDS_IN_MINUTE;
 
 export const isSettingValueValid = (newValue: number): boolean => {
     if (newValue % DIVIDER !== REMAINDER_FROM_DIVISION) {
