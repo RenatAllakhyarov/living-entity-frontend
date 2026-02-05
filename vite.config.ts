@@ -4,6 +4,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react()],
+  esbuild: {
+    target: "es2022"
+  },
   resolve: {
     alias: {
       "@api": path.resolve(__dirname, "./src/api"),

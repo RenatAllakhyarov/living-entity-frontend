@@ -1,7 +1,24 @@
 import { EntityConfig } from "@config/EntityConfig";
 import { Emotions } from "@utils/constants";
 
-function handleIncorrectValues<T>(
+function handleMaxValueChecker<T>(
+    value: Function,
+    context: ClassMethodDecoratorContext,
+) {
+    return function (this: T, ...methodArguments: any[]) {
+        if (typeof methodArguments[0] !== "number") {
+            return;
+        }
+
+        if (methodArguments[0] > EntityConfig.MAX_POINTS_VALUE) {
+            methodArguments[0] = EntityConfig.MAX_POINTS_VALUE;
+        }
+
+        return value.apply(this, methodArguments);
+    };
+}
+
+function handleMinValueChecker<T>(
     value: Function,
     context: ClassMethodDecoratorContext,
 ) {
@@ -12,10 +29,6 @@ function handleIncorrectValues<T>(
 
         if (methodArguments[0] < 0) {
             methodArguments[0] = 0;
-        }
-
-        if (methodArguments[0] > 100) {
-            methodArguments[0] = 100;
         }
 
         return value.apply(this, methodArguments);
@@ -65,7 +78,8 @@ class LivingEntity {
         return this.healthPoints;
     }
 
-    @handleIncorrectValues
+    @handleMaxValueChecker
+    @handleMinValueChecker
     public setHealthPoints(newHealthPoints: number) {
         this.healthPoints = newHealthPoints;
     }
@@ -82,16 +96,13 @@ class LivingEntity {
         return this.hungerPoints;
     }
 
-    @handleIncorrectValues
+    @handleMaxValueChecker
+    @handleMinValueChecker
     public setHungerPoints(newHungerPoints: number) {
         this.hungerPoints = newHungerPoints;
     }
 
     private computeEmotion() {
-        if (!this.hungerPoints && !this.healthPoints) {
-            return Emotions.NONE;
-        }
-
         if (this.healthPoints >= 80 && this.hungerPoints >= 80) {
             return Emotions.HAPPY;
         }
@@ -129,19 +140,12 @@ class LivingEntity {
     }
 
     private entityLife() {
-        if (!this.isAlive) {
-            this.interval && clearInterval(this.interval);
-            this.interval = null;
-
-            return;
-        }
-
         if (
             this.hungerPoints > EntityConfig.GOOD_HUNGER_VALUE &&
             this.healthPoints < EntityConfig.DEFAULT_HEALTH_POINTS
         ) {
             this.setHealthPoints(
-                this.healthPoints + EntityConfig.HEALTH_LOOSE_SPEED,
+                this.healthPoints + EntityConfig.HEALTH_ADD_POINTS
             );
 
             this.updateEmotion();
@@ -154,7 +158,7 @@ class LivingEntity {
             this.healthPoints > EntityConfig.MIN_GOOD_HEALTH_POINTS_VALUE
         ) {
             this.setHungerPoints(
-                this.hungerPoints - EntityConfig.STARVING_SPEED,
+                this.hungerPoints - EntityConfig.STARVING_SPEED
             );
 
             this.updateEmotion();

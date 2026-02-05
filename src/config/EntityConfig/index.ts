@@ -2,6 +2,7 @@ import { Emotions } from "@utils/constants";
 
 export const EntityConfig = {
     HEALTH_LOOSE_SPEED: 10,
+    HEALTH_ADD_POINTS: 10,
     DYING_SPEED: 1,
     STARVING_SPEED: 10,
     DEFAULT_EMOTION: Emotions.HAPPY,
@@ -9,4 +10,5 @@ export const EntityConfig = {
     DEFAULT_HEALTH_POINTS: 100,
     GOOD_HUNGER_VALUE: 60,
     MIN_GOOD_HEALTH_POINTS_VALUE: 20,
+    MAX_POINTS_VALUE: 100,
 }
