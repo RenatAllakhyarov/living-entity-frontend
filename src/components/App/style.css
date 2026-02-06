@@ -1,0 +1,10 @@
+body {
+    margin: 0;
+}
+
+.emotion {
+    display: flex;
+    align-content: center;
+    font-size: 500px;
+
+}   

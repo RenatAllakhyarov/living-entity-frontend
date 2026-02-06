@@ -40,6 +40,30 @@ function preventNegativeValues<T>(
     };
 }
 
+export const DECREASE_VALUE = 10;
+export const DECREASE_BY_ONE_POINT = 1;
+
+export const GOOD_HUNGER_VALUE = 60;
+export const MIN_GOOD_HEALTH_POINTS_VALUE = 20;
+
+function handleIncorrectValues(
+    target: any,
+    key: string,
+    descriptor: PropertyDescriptor,
+) {
+    const original = descriptor.value;
+
+    descriptor.value = function (newValue: number) {
+        if (newValue < 0) {
+            newValue = 0;
+        }
+
+        return original.apply(this, [newValue]);
+    };
+
+    return descriptor;
+}
+
 class LivingEntity {
     private name: string;
     private createdAt: number;
@@ -47,11 +71,13 @@ class LivingEntity {
     private healthPoints: number;
     private emotion: Emotions;
     private state: LifeState;
+    // private emotion: Emotions | LifeStatus;
+    // private lifeStatus: LifeStatus;
 
     constructor(
         name: string,
         healthPoints?: number,
-        emotion?: Emotions,
+        emotion?: Emotions | LifeStatus,
         hungerPoints?: number,
     ) {
         this.name = name;
@@ -86,11 +112,11 @@ class LivingEntity {
         this.healthPoints = newHealthPoints;
     }
 
-    public getEmotion(): Emotions {
+    public getEmotion(): Emotions | LifeStatus {
         return this.emotion;
     }
 
-    public setEmotion(newEmotion: Emotions) {
+    public setEmotion(newEmotion: Emotions | LifeStatus) {
         this.emotion = newEmotion;
     }
 
