@@ -3,7 +3,7 @@ import { Emotions, LifeState } from "@utils/constants";
 
 export interface IStateEntity {
     onEntry?: () => void;
-    onTick: () => void;
+    onTick?: () => void;
 }
 
 function preventMaxExceed<T>(
@@ -167,7 +167,7 @@ class LivingEntity {
         [LifeState.REGENERATION]: {
             onTick: () => {
                 this.setHealthPoints(
-                    this.healthPoints + EntityConfig.ADDING_HEALTH_POINTS,
+                    this.healthPoints + EntityConfig.REGENERATION_SPEED,
                 );
             },
         },
@@ -196,7 +196,6 @@ class LivingEntity {
             onEntry: () => {
                 this.emotion = Emotions.NONE;
             },
-            onTick: () => {},
         },
     };
 
@@ -209,7 +208,7 @@ class LivingEntity {
             this.stateMachine[this.state].onEntry?.();
         }
 
-        this.stateMachine[this.state].onTick();
+        this.stateMachine[this.state].onTick?.();
 
         this.setEmotion(this.computeEmotion());
     }
