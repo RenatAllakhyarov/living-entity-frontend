@@ -1,7 +1,12 @@
 import { EntityConfig } from "@config/EntityConfig";
-import { Emotions } from "@utils/constants";
+import { Emotions, LifeState } from "@utils/constants";
 
-function handleMaxValueChecker<T>(
+export interface IStateEntity {
+    onEntry?: () => void;
+    onTick: () => void;
+}
+
+function preventMaxExceed<T>(
     value: Function,
     context: ClassMethodDecoratorContext,
 ) {
@@ -18,7 +23,7 @@ function handleMaxValueChecker<T>(
     };
 }
 
-function handleMinValueChecker<T>(
+function preventNegativeValues<T>(
     value: Function,
     context: ClassMethodDecoratorContext,
 ) {
@@ -41,8 +46,7 @@ class LivingEntity {
     private hungerPoints: number;
     private healthPoints: number;
     private emotion: Emotions;
-    private isAlive: boolean;
-    private interval: NodeJS.Timeout | null;
+    private state: LifeState;
 
     constructor(
         name: string,
@@ -55,18 +59,16 @@ class LivingEntity {
         this.emotion = emotion ?? EntityConfig.DEFAULT_EMOTION;
         this.hungerPoints = hungerPoints ?? EntityConfig.DEFAULT_HUNGER_POINTS;
         this.createdAt = Date.now();
-        this.isAlive = true;
+        this.state = LifeState.STARVING;
 
-        this.interval = setInterval(() => {
-            this.entityLife();
-        }, 1000);
+        this.entityLife();
     }
 
     public getName(): string {
         return this.name;
     }
 
-    public setName(newName: string) {
+    public setName(newName: string): void {
         this.name = newName;
     }
 
@@ -78,9 +80,9 @@ class LivingEntity {
         return this.healthPoints;
     }
 
-    @handleMaxValueChecker
-    @handleMinValueChecker
-    public setHealthPoints(newHealthPoints: number) {
+    @preventMaxExceed
+    @preventNegativeValues
+    public setHealthPoints(newHealthPoints: number): void {
         this.healthPoints = newHealthPoints;
     }
 
@@ -88,21 +90,21 @@ class LivingEntity {
         return this.emotion;
     }
 
-    public updateEmotion() {
-        this.emotion = this.computeEmotion();
+    public setEmotion(newEmotion: Emotions) {
+        this.emotion = newEmotion;
     }
 
     public getHungerPoints(): number {
         return this.hungerPoints;
     }
 
-    @handleMaxValueChecker
-    @handleMinValueChecker
-    public setHungerPoints(newHungerPoints: number) {
+    @preventMaxExceed
+    @preventNegativeValues
+    public setHungerPoints(newHungerPoints: number): void {
         this.hungerPoints = newHungerPoints;
     }
 
-    private computeEmotion() {
+    private computeEmotion(): Emotions {
         if (this.healthPoints >= 80 && this.hungerPoints >= 80) {
             return Emotions.HAPPY;
         }
@@ -139,56 +141,89 @@ class LivingEntity {
         return EntityConfig.DEFAULT_EMOTION;
     }
 
-    private entityLife() {
+    private computeState(): LifeState {
+        if (this.healthPoints <= 0) {
+            return LifeState.DEAD;
+        }
+
         if (
             this.hungerPoints > EntityConfig.GOOD_HUNGER_VALUE &&
             this.healthPoints < EntityConfig.DEFAULT_HEALTH_POINTS
         ) {
-            this.setHealthPoints(
-                this.healthPoints + EntityConfig.HEALTH_ADD_POINTS
-            );
-
-            this.updateEmotion();
-
-            return;
+            return LifeState.REGENERATION;
         }
 
         if (
             this.hungerPoints > 0 &&
             this.healthPoints > EntityConfig.MIN_GOOD_HEALTH_POINTS_VALUE
         ) {
-            this.setHungerPoints(
-                this.hungerPoints - EntityConfig.STARVING_SPEED
-            );
-
-            this.updateEmotion();
-
-            return;
+            return LifeState.STARVING;
         }
 
-        if (this.healthPoints > 0) {
-            const decreaseValue =
-                this.healthPoints < EntityConfig.MIN_GOOD_HEALTH_POINTS_VALUE
-                    ? EntityConfig.DYING_SPEED
-                    : EntityConfig.HEALTH_LOOSE_SPEED;
+        return LifeState.DYING;
+    }
 
-            this.setHealthPoints(this.healthPoints - decreaseValue);
+    private stateMachine: Record<LifeState, IStateEntity> = {
+        [LifeState.REGENERATION]: {
+            onTick: () => {
+                this.setHealthPoints(
+                    this.healthPoints + EntityConfig.ADDING_HEALTH_POINTS,
+                );
+            },
+        },
 
-            this.updateEmotion();
+        [LifeState.STARVING]: {
+            onTick: () => {
+                this.setHungerPoints(
+                    this.hungerPoints - EntityConfig.STARVING_SPEED,
+                );
+            },
+        },
 
-            return;
+        [LifeState.DYING]: {
+            onTick: () => {
+                const decreaseValue =
+                    this.healthPoints <
+                    EntityConfig.MIN_GOOD_HEALTH_POINTS_VALUE
+                        ? EntityConfig.DYING_SPEED
+                        : EntityConfig.HEALTH_LOOSE_SPEED;
+
+                this.setHealthPoints(this.healthPoints - decreaseValue);
+            },
+        },
+
+        [LifeState.DEAD]: {
+            onEntry: () => {
+                this.emotion = Emotions.NONE;
+            },
+            onTick: () => {},
+        },
+    };
+
+    private tick(): void {
+        const nextState = this.computeState();
+
+        if (nextState !== this.state) {
+            this.state = nextState;
+
+            this.stateMachine[this.state].onEntry?.();
         }
 
-        if (!this.healthPoints) {
-            this.emotion = Emotions.NONE;
-            this.isAlive = false;
-            this.interval && clearInterval(this.interval);
-            this.interval = null;
+        this.stateMachine[this.state].onTick();
 
-            return;
-        }
+        this.setEmotion(this.computeEmotion());
+    }
 
-        this.updateEmotion();
+    private entityLife() {
+        const interval = setInterval(() => {
+            if (!this.healthPoints) {
+                clearInterval(interval);
+
+                return;
+            }
+
+            this.tick();
+        }, EntityConfig.LIVING_INTERVAL);
     }
 }
 

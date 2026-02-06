@@ -8,3 +8,10 @@ export const enum Emotions {
     ANGRY = "🤬",
     NONE = "😐",
 }
+
+export const enum LifeState {
+    REGENERATION ,
+    STARVING,
+    DYING,
+    DEAD,
+}
