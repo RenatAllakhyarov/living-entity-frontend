@@ -1,5 +1,5 @@
-import { EntityConfig } from "@config/EntityConfig";
 import { Emotions, LifeState } from "@utils/constants";
+import { EntityConfig } from "@config/EntityConfig";
 
 export interface IStateEntity {
     onEntry?: () => void;
@@ -40,44 +40,18 @@ function preventNegativeValues<T>(
     };
 }
 
-export const DECREASE_VALUE = 10;
-export const DECREASE_BY_ONE_POINT = 1;
-
-export const GOOD_HUNGER_VALUE = 60;
-export const MIN_GOOD_HEALTH_POINTS_VALUE = 20;
-
-function handleIncorrectValues(
-    target: any,
-    key: string,
-    descriptor: PropertyDescriptor,
-) {
-    const original = descriptor.value;
-
-    descriptor.value = function (newValue: number) {
-        if (newValue < 0) {
-            newValue = 0;
-        }
-
-        return original.apply(this, [newValue]);
-    };
-
-    return descriptor;
-}
-
 class LivingEntity {
     private name: string;
     private createdAt: number;
     private hungerPoints: number;
     private healthPoints: number;
-    private emotion: Emotions;
     private state: LifeState;
-    // private emotion: Emotions | LifeStatus;
-    // private lifeStatus: LifeStatus;
+    private emotion: Emotions | LifeState;
 
     constructor(
         name: string,
         healthPoints?: number,
-        emotion?: Emotions | LifeStatus,
+        emotion?: Emotions | LifeState,
         hungerPoints?: number,
     ) {
         this.name = name;
@@ -112,11 +86,11 @@ class LivingEntity {
         this.healthPoints = newHealthPoints;
     }
 
-    public getEmotion(): Emotions | LifeStatus {
+    public getEmotion(): Emotions | LifeState {
         return this.emotion;
     }
 
-    public setEmotion(newEmotion: Emotions | LifeStatus) {
+    public setEmotion(newEmotion: Emotions | LifeState) {
         this.emotion = newEmotion;
     }
 
@@ -128,6 +102,10 @@ class LivingEntity {
     @preventNegativeValues
     public setHungerPoints(newHungerPoints: number): void {
         this.hungerPoints = newHungerPoints;
+    }
+
+    public getState(): LifeState {
+        return this.state;
     }
 
     private computeEmotion(): Emotions {
@@ -195,6 +173,10 @@ class LivingEntity {
                 this.setHealthPoints(
                     this.healthPoints + EntityConfig.REGENERATION_SPEED,
                 );
+
+                this.setHungerPoints(
+                    this.hungerPoints - EntityConfig.STARVING_SPEED,
+                );
             },
         },
 
@@ -220,7 +202,7 @@ class LivingEntity {
 
         [LifeState.DEAD]: {
             onEntry: () => {
-                this.emotion = Emotions.NONE;
+                this.emotion = LifeState.DEAD;
             },
         },
     };
@@ -232,6 +214,7 @@ class LivingEntity {
             this.state = nextState;
 
             this.stateMachine[this.state].onEntry?.();
+            return;
         }
 
         this.stateMachine[this.state].onTick?.();
@@ -241,7 +224,7 @@ class LivingEntity {
 
     private entityLife() {
         const interval = setInterval(() => {
-            if (!this.healthPoints) {
+            if (this.state === LifeState.DEAD) {
                 clearInterval(interval);
 
                 return;

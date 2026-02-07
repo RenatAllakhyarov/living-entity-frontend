@@ -13,5 +13,5 @@ export const enum LifeState {
     REGENERATION ,
     STARVING,
     DYING,
-    DEAD,
+    DEAD = "⚰️",
 }
