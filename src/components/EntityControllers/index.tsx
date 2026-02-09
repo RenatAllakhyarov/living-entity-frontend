@@ -1,6 +1,6 @@
 import LivingEntity from "@domains/LivingEntity";
 import LivingEntityControllers from "@domains/LivingEntityControllers";
-import { ChangeEvent, type ReactElement, useState } from "react";
+import { type ChangeEvent, type ReactElement, useState } from "react";
 import "./style.css";
 
 interface IEntityControllerProps {
@@ -10,8 +10,8 @@ interface IEntityControllerProps {
 const EntityControllers = ({
     entity,
 }: IEntityControllerProps): ReactElement => {
-    const [isOpened, setIsOpened] = useState(false);
     const [newName, setNewName] = useState("");
+    const [isNameChangingOpened, setIsNameChangingOpened] = useState(false);
 
     const handleFeedEntity = () => {
         LivingEntityControllers.feed(entity);
@@ -23,14 +23,14 @@ const EntityControllers = ({
 
     const handleNameChange = () => {
         if (entity.getName() === newName || newName === "") {
-            setIsOpened(false);
+            setIsNameChangingOpened(false);
 
             return;
         }
 
         LivingEntityControllers.changeName(entity, newName);
 
-        setIsOpened(false);
+        setIsNameChangingOpened(false);
     };
 
     const handleTextChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -51,17 +51,17 @@ const EntityControllers = ({
             </div>
 
             <div className="entity-controller">
-                {!isOpened && (
+                {!isNameChangingOpened && (
                     <button
                         onClick={() => {
-                            setIsOpened(true);
+                            setIsNameChangingOpened(true);
                         }}
                     >
                         CHANGE NAME
                     </button>
                 )}
 
-                {isOpened && (
+                {isNameChangingOpened && (
                     <div className="changing-name">
                         <input
                             type="text"

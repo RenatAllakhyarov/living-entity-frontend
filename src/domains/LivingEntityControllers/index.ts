@@ -4,36 +4,44 @@ import { LifeState } from "@utils/constants";
 
 export const INCREASE_VALUE = 20;
 
-class LivingEntityControllers {
-    public static feed(entity: LivingEntity) {
-        if (entity.getState() === LifeState.DEAD) {
+function isEntityDead<T>(
+    value: Function,
+    context: ClassMethodDecoratorContext,
+) {
+    return function (this: T, ...methodArguments: any[]) {
+        if (typeof methodArguments[0] !== "object") {
             return;
         }
 
+        if (methodArguments[0] === LifeState.DEAD) {
+            return;
+        }
+
+        return value.apply(this, methodArguments);
+    };
+}
+
+class LivingEntityControllers {
+    @isEntityDead
+    public static feed(entity: LivingEntity) {
         if (entity.getHungerPoints() >= EntityConfig.GOOD_HUNGER_VALUE) {
-            throw new Error("Your entity is not hungry!");
+            return;
         }
 
         entity.setHungerPoints(entity.getHungerPoints() + INCREASE_VALUE);
     }
 
+    @isEntityDead
     public static cure(entity: LivingEntity) {
-        if (entity.getState() === LifeState.DEAD) {
-            return;
-        }
-
         if (entity.getHealthPoints() >= EntityConfig.GOOD_HEALTH_VALUE) {
-            throw new Error("Your entity is feeling well");
+            return;
         }
 
         entity.setHealthPoints(entity.getHealthPoints() + INCREASE_VALUE);
     }
 
+    @isEntityDead
     public static changeName(entity: LivingEntity, newName: string) {
-        if (entity.getState() === LifeState.DEAD) {
-            return;
-        }
-
         entity.setName(newName);
     }
 }

@@ -1,5 +1,7 @@
 import LivingEntity from "@domains/LivingEntity";
 import { ReactElement, useEffect, useState } from "react";
+import { EntityConfig } from "@config/EntityConfig";
+import { LifeState } from "@utils/constants";
 import "./style.css";
 
 interface IEntityParamsProps {
@@ -7,18 +9,37 @@ interface IEntityParamsProps {
 }
 
 const EntityParameters = ({ entity }: IEntityParamsProps): ReactElement => {
-    const [name, setName] = useState(entity.getName());
-    const [hungerPoints, setHungerPoints] = useState(entity.getHungerPoints());
-    const [healthPoints, setHealthPoints] = useState(entity.getHealthPoints());
-    const [emotion, setEmotion] = useState(entity.getEmotion());
+    const [entityState, setEntityState] = useState({
+        name: entity.getName(),
+        hungerPoints: entity.getHungerPoints(),
+        healthPoints: entity.getHealthPoints(),
+        emotion: entity.getEmotion(),
+        state: entity.getState(),
+    });
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setName(entity.getName());
-            setHungerPoints(entity.getHungerPoints());
-            setHealthPoints(entity.getHealthPoints());
-            setEmotion(entity.getEmotion());
-        }, 1000);
+            if (entityState.name !== entity.getName()) {
+                setEntityState((previous) => ({
+                    ...previous,
+                    name: entity.getName(),
+                }));
+            }
+
+            if (entityState.state !== entity.getState()) {
+                setEntityState((previous) => ({
+                    ...previous,
+                    state: entity.getState(),
+                }));
+            }
+
+            setEntityState((previous) => ({
+                ...previous,
+                hungerPoints: entity.getHungerPoints(),
+                healthPoints: entity.getHealthPoints(),
+                emotion: entity.getEmotion(),
+            }));
+        }, EntityConfig.LIVING_INTERVAL);
 
         return () => clearInterval(interval);
     }, []);
@@ -29,22 +50,25 @@ const EntityParameters = ({ entity }: IEntityParamsProps): ReactElement => {
                 <div
                     className="entity-parameter"
                     style={{
-                        background: `linear-gradient(to right, red ${hungerPoints}%, transparent ${hungerPoints}%)`,
+                        background: `linear-gradient(to right, red ${entityState.hungerPoints}%, transparent ${entityState.hungerPoints}%)`,
                     }}
                 >
-                    HUNGER: {hungerPoints}
+                    HUNGER: {entityState.hungerPoints}
                 </div>
-                <div className="entity-parameter">{name}</div>
+                <div className="entity-parameter">{entityState.name}</div>
                 <div
                     className="entity-parameter"
                     style={{
-                        background: `linear-gradient(to right, brown ${healthPoints}%, transparent ${healthPoints}%)`,
+                        background: `linear-gradient(to right, brown ${entityState.healthPoints}%, transparent ${entityState.healthPoints}%)`,
                     }}
                 >
-                    HEALTH: {healthPoints}
+                    HEALTH: {entityState.healthPoints}
                 </div>
             </div>
-            <div className="entity-emotion">{emotion}</div>
+            <div className="entity-emotion">
+                {entityState.state !== LifeState.DEAD && entityState.emotion}
+                {entityState.state === LifeState.DEAD && LifeState.DEAD}
+            </div>
         </div>
     );
 };

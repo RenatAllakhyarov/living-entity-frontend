@@ -46,12 +46,12 @@ class LivingEntity {
     private hungerPoints: number;
     private healthPoints: number;
     private state: LifeState;
-    private emotion: Emotions | LifeState;
+    private emotion: Emotions;
 
     constructor(
         name: string,
         healthPoints?: number,
-        emotion?: Emotions | LifeState,
+        emotion?: Emotions,
         hungerPoints?: number,
     ) {
         this.name = name;
@@ -90,7 +90,7 @@ class LivingEntity {
         return this.emotion;
     }
 
-    public setEmotion(newEmotion: Emotions | LifeState) {
+    public setEmotion(newEmotion: Emotions) {
         this.emotion = newEmotion;
     }
 
@@ -151,7 +151,7 @@ class LivingEntity {
         }
 
         if (
-            this.hungerPoints > EntityConfig.GOOD_HUNGER_VALUE &&
+            this.hungerPoints >= EntityConfig.GOOD_HUNGER_VALUE &&
             this.healthPoints < EntityConfig.DEFAULT_HEALTH_POINTS
         ) {
             return LifeState.REGENERATION;
@@ -202,7 +202,7 @@ class LivingEntity {
 
         [LifeState.DEAD]: {
             onEntry: () => {
-                this.emotion = LifeState.DEAD;
+                this.emotion = Emotions.NONE;
             },
         },
     };
