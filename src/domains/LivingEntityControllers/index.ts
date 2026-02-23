@@ -1,20 +1,13 @@
-import LivingEntity from "@domains/LivingEntity";
 import { EntityConfig } from "@config/EntityConfig";
 import { LifeState } from "@utils/constants";
 
-export const INCREASE_VALUE = 20;
-
-function isEntityDead<T>(
+function preventActionOnDeadEntity<T>(
     value: Function,
     context: ClassMethodDecoratorContext,
-) {
+): any {
     return function (this: T, ...methodArguments: any[]) {
-        if (typeof methodArguments[0] !== "object") {
-            return;
-        }
-
-        if (methodArguments[0] === LifeState.DEAD) {
-            return;
+        if (methodArguments[0].state === LifeState.DEAD) {
+            throw new Error("Entity is dead");
         }
 
         return value.apply(this, methodArguments);
@@ -22,27 +15,36 @@ function isEntityDead<T>(
 }
 
 class LivingEntityControllers {
-    @isEntityDead
-    public static feed(entity: LivingEntity) {
-        if (entity.getHungerPoints() >= EntityConfig.GOOD_HUNGER_VALUE) {
+    @preventActionOnDeadEntity
+    public static feed(
+        getHungerPoints: () => number,
+        setHungerPoints: (newHungerPoints: number) => void,
+    ) {
+        if (getHungerPoints() >= EntityConfig.GOOD_HUNGER_VALUE) {
             return;
         }
 
-        entity.setHungerPoints(entity.getHungerPoints() + INCREASE_VALUE);
+        setHungerPoints(getHungerPoints() + EntityConfig.RESTORE_VALUE);
     }
 
-    @isEntityDead
-    public static cure(entity: LivingEntity) {
-        if (entity.getHealthPoints() >= EntityConfig.GOOD_HEALTH_VALUE) {
+    @preventActionOnDeadEntity
+    public static cure(
+        getHealthPoints: () => number,
+        setHealthPoints: (newHealthPoints: number) => void,
+    ) {
+        if (getHealthPoints() >= EntityConfig.GOOD_HEALTH_VALUE) {
             return;
         }
 
-        entity.setHealthPoints(entity.getHealthPoints() + INCREASE_VALUE);
+        setHealthPoints(getHealthPoints() + EntityConfig.RESTORE_VALUE);
     }
 
-    @isEntityDead
-    public static changeName(entity: LivingEntity, newName: string) {
-        entity.setName(newName);
+    @preventActionOnDeadEntity
+    public static changeName(
+        setName: (newName: string) => void,
+        newName: string,
+    ) {
+        setName(newName);
     }
 }
 

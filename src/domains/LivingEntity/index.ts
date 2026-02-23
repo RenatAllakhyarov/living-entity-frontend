@@ -86,7 +86,7 @@ class LivingEntity {
         this.healthPoints = newHealthPoints;
     }
 
-    public getEmotion(): Emotions | LifeState {
+    public getEmotion(): Emotions {
         return this.emotion;
     }
 

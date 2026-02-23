@@ -15,3 +15,11 @@ export const enum LifeState {
     DYING,
     DEAD = "⚰️",
 }
+
+export type EntityState = {
+    name: string, 
+    hungerPoints: number,
+    healthPoints: number,
+    emotion: Emotions,
+    state: LifeState,
+}

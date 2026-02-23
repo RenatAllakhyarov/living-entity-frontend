@@ -1,7 +1,8 @@
 import LivingEntity from "@domains/LivingEntity";
-import { ReactElement, useEffect, useState } from "react";
+import EntityEmotion from "@components/EntityEmotion";
+import { type ReactElement, useEffect, useState } from "react";
 import { EntityConfig } from "@config/EntityConfig";
-import { LifeState } from "@utils/constants";
+import { EntityState } from "@utils/constants";
 import "./style.css";
 
 interface IEntityParamsProps {
@@ -17,28 +18,45 @@ const EntityParameters = ({ entity }: IEntityParamsProps): ReactElement => {
         state: entity.getState(),
     });
 
+    const computeEntityNextState = (
+        previousState: EntityState,
+        entity: LivingEntity,
+    ): EntityState => {
+        const nextName = entity.getName();
+        const nextHungerPoints = entity.getHungerPoints();
+        const nextHealthPoints = entity.getHealthPoints();
+        const nextEmotion = entity.getEmotion();
+        const nextState = entity.getState();
+
+        const isChanged =
+            nextName !== previousState.name ||
+            nextHungerPoints !== previousState.hungerPoints ||
+            nextHealthPoints !== previousState.healthPoints ||
+            nextEmotion !== previousState.emotion ||
+            nextState !== previousState.state;
+
+        if (isChanged) {
+            return {
+                name: nextName,
+                hungerPoints: nextHungerPoints,
+                healthPoints: nextHealthPoints,
+                emotion: nextEmotion,
+                state: nextState,
+            };
+        }
+
+        return previousState;
+    };
+
+    const computeParameterBackground = (color: string, percents: number) => {
+        return `linear-gradient(to right, ${color} ${percents}%, transparent ${percents}%)`;
+    };
+
     useEffect(() => {
         const interval = setInterval(() => {
-            if (entityState.name !== entity.getName()) {
-                setEntityState((previous) => ({
-                    ...previous,
-                    name: entity.getName(),
-                }));
-            }
-
-            if (entityState.state !== entity.getState()) {
-                setEntityState((previous) => ({
-                    ...previous,
-                    state: entity.getState(),
-                }));
-            }
-
-            setEntityState((previous) => ({
-                ...previous,
-                hungerPoints: entity.getHungerPoints(),
-                healthPoints: entity.getHealthPoints(),
-                emotion: entity.getEmotion(),
-            }));
+            setEntityState((previous) =>
+                computeEntityNextState(previous, entity),
+            );
         }, EntityConfig.LIVING_INTERVAL);
 
         return () => clearInterval(interval);
@@ -50,7 +68,10 @@ const EntityParameters = ({ entity }: IEntityParamsProps): ReactElement => {
                 <div
                     className="entity-parameter"
                     style={{
-                        background: `linear-gradient(to right, red ${entityState.hungerPoints}%, transparent ${entityState.hungerPoints}%)`,
+                        background: computeParameterBackground(
+                            "red",
+                            entityState.hungerPoints,
+                        ),
                     }}
                 >
                     HUNGER: {entityState.hungerPoints}
@@ -59,16 +80,19 @@ const EntityParameters = ({ entity }: IEntityParamsProps): ReactElement => {
                 <div
                     className="entity-parameter"
                     style={{
-                        background: `linear-gradient(to right, brown ${entityState.healthPoints}%, transparent ${entityState.healthPoints}%)`,
+                        background: computeParameterBackground(
+                            "brown",
+                            entityState.healthPoints,
+                        ),
                     }}
                 >
                     HEALTH: {entityState.healthPoints}
                 </div>
             </div>
-            <div className="entity-emotion">
-                {entityState.state !== LifeState.DEAD && entityState.emotion}
-                {entityState.state === LifeState.DEAD && LifeState.DEAD}
-            </div>
+            <EntityEmotion
+                emotion={entityState.emotion}
+                state={entityState.state}
+            />
         </div>
     );
 };

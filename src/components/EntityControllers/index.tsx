@@ -1,6 +1,7 @@
 import LivingEntity from "@domains/LivingEntity";
+import EntityNameEditor from "@components/EntityNameEditor";
 import LivingEntityControllers from "@domains/LivingEntityControllers";
-import { type ChangeEvent, type ReactElement, useState } from "react";
+import { type ReactElement } from "react";
 import "./style.css";
 
 interface IEntityControllerProps {
@@ -10,35 +11,18 @@ interface IEntityControllerProps {
 const EntityControllers = ({
     entity,
 }: IEntityControllerProps): ReactElement => {
-    const [newName, setNewName] = useState("");
-    const [isNameChangingOpened, setIsNameChangingOpened] = useState(false);
-
     const handleFeedEntity = () => {
-        LivingEntityControllers.feed(entity);
+        LivingEntityControllers.feed(
+            () => entity.getHungerPoints(),
+            (newHungerPoints) => entity.setHungerPoints(newHungerPoints),
+        );
     };
 
     const handleCureEntity = () => {
-        LivingEntityControllers.cure(entity);
-    };
-
-    const handleNameChange = () => {
-        if (entity.getName() === newName || newName === "") {
-            setIsNameChangingOpened(false);
-
-            return;
-        }
-
-        LivingEntityControllers.changeName(entity, newName);
-
-        setIsNameChangingOpened(false);
-    };
-
-    const handleTextChange = (event: ChangeEvent<HTMLInputElement>) => {
-        if (event.target.value === entity.getName()) {
-            return;
-        }
-
-        setNewName(event.target.value);
+        LivingEntityControllers.cure(
+            () => entity.getHealthPoints(),
+            (newHealthPoints) => entity.setHealthPoints(newHealthPoints),
+        );
     };
 
     return (
@@ -49,29 +33,11 @@ const EntityControllers = ({
             <div className="entity-controller">
                 <button onClick={handleCureEntity}>CURE</button>
             </div>
-
             <div className="entity-controller">
-                {!isNameChangingOpened && (
-                    <button
-                        onClick={() => {
-                            setIsNameChangingOpened(true);
-                        }}
-                    >
-                        CHANGE NAME
-                    </button>
-                )}
-
-                {isNameChangingOpened && (
-                    <div className="changing-name">
-                        <input
-                            type="text"
-                            value={newName}
-                            onChange={handleTextChange}
-                            autoFocus
-                        />
-                        <button onClick={handleNameChange}>submit</button>
-                    </div>
-                )}
+                <EntityNameEditor
+                    initialName={entity.getName()}
+                    onSubmit={(newName) => entity.setName(newName)}
+                />
             </div>
         </div>
     );

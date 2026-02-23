@@ -13,4 +13,5 @@ export const EntityConfig = {
     DYING_SPEED: 1,
     STARVING_SPEED: 10,
     LIVING_INTERVAL: 1000,
+    RESTORE_VALUE: 20,
 }
