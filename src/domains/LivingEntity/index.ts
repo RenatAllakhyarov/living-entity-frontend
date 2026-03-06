@@ -1,4 +1,4 @@
-import { Emotions, LifeState } from "@utils/constants";
+import { Emotions, EntityState, LifeState } from "@utils/constants";
 import { EntityConfig } from "@config/EntityConfig";
 
 export interface IStateEntity {
@@ -106,6 +106,16 @@ class LivingEntity {
 
     public getState(): LifeState {
         return this.state;
+    }
+
+    public getAllState(): EntityState {
+        return {
+            name: this.getName(),
+            hungerPoints: this.getHungerPoints(),
+            healthPoints: this.getHealthPoints(),
+            emotion: this.getEmotion(),
+            state: this.getState(),
+        };
     }
 
     private computeEmotion(): Emotions {

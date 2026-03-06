@@ -1,6 +1,6 @@
 import LivingEntity from "@domains/LivingEntity";
 import EntityNameEditor from "@components/EntityNameEditor";
-import LivingEntityControllers from "@domains/LivingEntityControllers";
+import LivingEntityController from "@domains/LivingEntityController";
 import { type ReactElement } from "react";
 import "./style.css";
 
@@ -8,25 +8,21 @@ interface IEntityControllerProps {
     entity: LivingEntity;
 }
 
-const EntityControllers = ({
+const EntityController = ({
     entity,
 }: IEntityControllerProps): ReactElement => {
+    const entityController = new LivingEntityController(entity)
+
     const handleFeedEntity = () => {
-        LivingEntityControllers.feed(
-            () => entity.getHungerPoints(),
-            (newHungerPoints) => entity.setHungerPoints(newHungerPoints),
-        );
+        entityController.feed()
     };
 
     const handleCureEntity = () => {
-        LivingEntityControllers.cure(
-            () => entity.getHealthPoints(),
-            (newHealthPoints) => entity.setHealthPoints(newHealthPoints),
-        );
+        entityController.cure()
     };
 
     return (
-        <div className="entity-controllers">
+        <div className="entity-controller-section">
             <div className="entity-controller">
                 <button onClick={handleFeedEntity}>FEED</button>
             </div>
@@ -43,4 +39,4 @@ const EntityControllers = ({
     );
 };
 
-export default EntityControllers;
+export default EntityController;

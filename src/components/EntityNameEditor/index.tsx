@@ -1,6 +1,5 @@
-import LivingEntityControllers from "@domains/LivingEntityControllers";
+import LivingEntityController from "@domains/LivingEntityController";
 import { useState, type ChangeEvent, type ReactElement } from "react";
-import "./style.css";
 
 interface IEntityNameEditorProps {
     initialName: string;
@@ -29,7 +28,7 @@ const EntityNameEditor = ({
             return;
         }
 
-        LivingEntityControllers.changeName(onSubmit, newName);
+        LivingEntityController.changeName(onSubmit, newName);
 
         setIsNameChangingOpened(false);
     };

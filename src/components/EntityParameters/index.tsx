@@ -1,5 +1,6 @@
 import LivingEntity from "@domains/LivingEntity";
 import EntityEmotion from "@components/EntityEmotion";
+import LivingEntityController from "@domains/LivingEntityController";
 import { type ReactElement, useEffect, useState } from "react";
 import { EntityConfig } from "@config/EntityConfig";
 import { EntityState } from "@utils/constants";
@@ -22,35 +23,35 @@ const EntityParameters = ({ entity }: IEntityParamsProps): ReactElement => {
         previousState: EntityState,
         entity: LivingEntity,
     ): EntityState => {
-        const nextName = entity.getName();
-        const nextHungerPoints = entity.getHungerPoints();
-        const nextHealthPoints = entity.getHealthPoints();
-        const nextEmotion = entity.getEmotion();
-        const nextState = entity.getState();
+        const nextState: EntityState = entity.getAllState();
 
-        const isChanged =
-            nextName !== previousState.name ||
-            nextHungerPoints !== previousState.hungerPoints ||
-            nextHealthPoints !== previousState.healthPoints ||
-            nextEmotion !== previousState.emotion ||
-            nextState !== previousState.state;
+        const isChanged = LivingEntityController.shouldUpdate(
+            previousState,
+            nextState,
+        );
 
         if (isChanged) {
-            return {
-                name: nextName,
-                hungerPoints: nextHungerPoints,
-                healthPoints: nextHealthPoints,
-                emotion: nextEmotion,
-                state: nextState,
-            };
+            return nextState;
         }
 
         return previousState;
     };
 
     const computeParameterBackground = (color: string, percents: number) => {
-        return `linear-gradient(to right, ${color} ${percents}%, transparent ${percents}%)`;
+        return {
+            background: `linear-gradient(to right, ${color} ${percents}%, transparent ${percents}%)`,
+        };
     };
+
+    const hungerParameterBackground = computeParameterBackground(
+        "red",
+        entityState.hungerPoints,
+    );
+
+    const healthParameterBackground = computeParameterBackground(
+        "brown",
+        entityState.healthPoints,
+    );
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -67,24 +68,14 @@ const EntityParameters = ({ entity }: IEntityParamsProps): ReactElement => {
             <div className="entity-parameters">
                 <div
                     className="entity-parameter"
-                    style={{
-                        background: computeParameterBackground(
-                            "red",
-                            entityState.hungerPoints,
-                        ),
-                    }}
+                    style={hungerParameterBackground}
                 >
                     HUNGER: {entityState.hungerPoints}
                 </div>
                 <div className="entity-parameter">{entityState.name}</div>
                 <div
                     className="entity-parameter"
-                    style={{
-                        background: computeParameterBackground(
-                            "brown",
-                            entityState.healthPoints,
-                        ),
-                    }}
+                    style={healthParameterBackground}
                 >
                     HEALTH: {entityState.healthPoints}
                 </div>
