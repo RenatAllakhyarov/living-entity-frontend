@@ -17,22 +17,10 @@ const EntityController = ({ entity }: IEntityControllerProps): ReactElement => {
     return (
         <div className="entity-controller-section">
             <div className="entity-controller">
-                <button
-                    onClick={() => {
-                        entityController.feed();
-                    }}
-                >
-                    FEED
-                </button>
+                <button onClick={() => entityController.feed()}>FEED</button>
             </div>
             <div className="entity-controller">
-                <button
-                    onClick={() => {
-                        entityController.cure();
-                    }}
-                >
-                    CURE
-                </button>
+                <button onClick={() => entityController.cure()}>CURE</button>
             </div>
             <div className="entity-controller">
                 <EntityNameEditor
