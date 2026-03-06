@@ -1,5 +1,5 @@
+import { Emotions, EntityState, LifeState } from "@utils/constants";
 import { EntityConfig } from "@config/EntityConfig";
-import { Emotions, LifeState } from "@utils/constants";
 
 export interface IStateEntity {
     onEntry?: () => void;
@@ -45,8 +45,8 @@ class LivingEntity {
     private createdAt: number;
     private hungerPoints: number;
     private healthPoints: number;
-    private emotion: Emotions;
     private state: LifeState;
+    private emotion: Emotions;
 
     constructor(
         name: string,
@@ -104,6 +104,20 @@ class LivingEntity {
         this.hungerPoints = newHungerPoints;
     }
 
+    public getState(): LifeState {
+        return this.state;
+    }
+
+    public getAllState(): EntityState {
+        return {
+            name: this.getName(),
+            hungerPoints: this.getHungerPoints(),
+            healthPoints: this.getHealthPoints(),
+            emotion: this.getEmotion(),
+            state: this.getState(),
+        };
+    }
+
     private computeEmotion(): Emotions {
         if (this.healthPoints >= 80 && this.hungerPoints >= 80) {
             return Emotions.HAPPY;
@@ -147,7 +161,7 @@ class LivingEntity {
         }
 
         if (
-            this.hungerPoints > EntityConfig.GOOD_HUNGER_VALUE &&
+            this.hungerPoints >= EntityConfig.GOOD_HUNGER_VALUE &&
             this.healthPoints < EntityConfig.DEFAULT_HEALTH_POINTS
         ) {
             return LifeState.REGENERATION;
@@ -168,6 +182,10 @@ class LivingEntity {
             onTick: () => {
                 this.setHealthPoints(
                     this.healthPoints + EntityConfig.REGENERATION_SPEED,
+                );
+
+                this.setHungerPoints(
+                    this.hungerPoints - EntityConfig.STARVING_SPEED,
                 );
             },
         },
@@ -206,6 +224,7 @@ class LivingEntity {
             this.state = nextState;
 
             this.stateMachine[this.state].onEntry?.();
+            return;
         }
 
         this.stateMachine[this.state].onTick?.();
@@ -215,7 +234,7 @@ class LivingEntity {
 
     private entityLife() {
         const interval = setInterval(() => {
-            if (!this.healthPoints) {
+            if (this.state === LifeState.DEAD) {
                 clearInterval(interval);
 
                 return;
