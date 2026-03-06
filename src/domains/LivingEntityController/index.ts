@@ -33,7 +33,9 @@ class LivingEntityController {
             return;
         }
 
-        this.entity.setHungerPoints(hungerPoints + EntityConfig.RESTORE_POINTS);
+        this.entity.setHungerPoints(
+            hungerPoints + EntityConfig.HUNGER_RESTORE_POINTS,
+        );
     }
 
     @preventActionOnDeadEntity
@@ -43,7 +45,9 @@ class LivingEntityController {
             return;
         }
 
-        this.entity.setHealthPoints(healthPoints + EntityConfig.RESTORE_POINTS);
+        this.entity.setHealthPoints(
+            healthPoints + EntityConfig.HEALTH_RESTORE_POINTS,
+        );
     }
 
     public static changeName(

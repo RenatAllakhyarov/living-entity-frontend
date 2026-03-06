@@ -1,7 +1,7 @@
 import LivingEntity from "@domains/LivingEntity";
 import EntityEmotion from "@components/EntityEmotion";
 import LivingEntityController from "@domains/LivingEntityController";
-import { type ReactElement, useEffect, useState } from "react";
+import { CSSProperties, type ReactElement, useEffect, useState } from "react";
 import { EntityConfig } from "@config/EntityConfig";
 import { EntityState } from "@utils/constants";
 import "./style.css";
@@ -11,13 +11,7 @@ interface IEntityParamsProps {
 }
 
 const EntityParameters = ({ entity }: IEntityParamsProps): ReactElement => {
-    const [entityState, setEntityState] = useState({
-        name: entity.getName(),
-        hungerPoints: entity.getHungerPoints(),
-        healthPoints: entity.getHealthPoints(),
-        emotion: entity.getEmotion(),
-        state: entity.getState(),
-    });
+    const [entityState, setEntityState] = useState(entity.getAllState());
 
     const computeEntityNextState = (
         previousState: EntityState,
@@ -37,21 +31,13 @@ const EntityParameters = ({ entity }: IEntityParamsProps): ReactElement => {
         return previousState;
     };
 
-    const computeParameterBackground = (color: string, percents: number) => {
-        return {
-            background: `linear-gradient(to right, ${color} ${percents}%, transparent ${percents}%)`,
-        };
+    const hungerParameterBackground: CSSProperties = {
+        background: `linear-gradient(to right, red ${entityState.hungerPoints}%, transparent ${entityState.hungerPoints}%)`,
     };
 
-    const hungerParameterBackground = computeParameterBackground(
-        "red",
-        entityState.hungerPoints,
-    );
-
-    const healthParameterBackground = computeParameterBackground(
-        "brown",
-        entityState.healthPoints,
-    );
+    const healthParameterBackground: CSSProperties = {
+        background: `linear-gradient(to right, brown ${entityState.healthPoints}%, transparent ${entityState.healthPoints}%)`,
+    };
 
     useEffect(() => {
         const interval = setInterval(() => {
